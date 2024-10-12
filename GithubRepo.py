@@ -14,6 +14,10 @@ def fetch_repo_info(owner, repo):
             'forks': repo_data['forks_count'],
             'language': repo_data['language'],
             'url': repo_data['html_url'],
+            'created_at': repo_data['created_at'],
+            'updated_at': repo_data['updated_at'],
+            'open_issues': repo_data['open_issues_count'],
+            'license': repo_data.get('license', {}).get('name', 'No license'),
         }
     else:
         print(f"Error fetching repo: {response.json().get('message', 'Unknown error')}")
@@ -27,6 +31,10 @@ def display_repo_info(repo_info):
         print(f"Forks: {repo_info['forks']}")
         print(f"Language: {repo_info['language']}")
         print(f"URL: {repo_info['url']}")
+        print(f"Created At: {repo_info['created_at']}")
+        print(f"Updated At: {repo_info['updated_at']}")
+        print(f"Open Issues: {repo_info['open_issues']}")
+        print(f"License: {repo_info['license']}")
     else:
         print("No information to display.")
 
