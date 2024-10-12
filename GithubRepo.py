@@ -1,50 +1,40 @@
-import os
 import requests
-import json
-import subprocess
+import argparse
 
-# Replace these with your own details
-GITHUB_TOKEN = 'your_personal_access_token'
-GITHUB_USERNAME = 'your_github_username'
-REPO_NAME = 'new_repository_name'
-REPO_DESCRIPTION = 'Description of your new repository'
-PRIVATE = False  # Change to True for a private repo
-
-# Function to create a new GitHub repository
-def create_github_repo():
-    url = f'https://api.github.com/user/repos'
-    headers = {
-        'Authorization': f'token {GITHUB_TOKEN}',
-        'Accept': 'application/vnd.github.v3+json',
-    }
-    data = {
-        'name': REPO_NAME,
-        'description': REPO_DESCRIPTION,
-        'private': PRIVATE,
-    }
+def fetch_repo_info(owner, repo):
+    url = f'https://api.github.com/repos/{owner}/{repo}'
+    response = requests.get(url)
     
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    
-    if response.status_code == 201:
-        print(f'Repository {REPO_NAME} created successfully!')
+    if response.status_code == 200:
+        repo_data = response.json()
+        return {
+            'name': repo_data['name'],
+            'description': repo_data['description'],
+            'stars': repo_data['stargazers_count'],
+            'forks': repo_data['forks_count'],
+            'language': repo_data['language'],
+            'url': repo_data['html_url'],
+        }
     else:
-        print(f'Failed to create repository: {response.json()}')
+        print(f"Error fetching repo: {response.json().get('message', 'Unknown error')}")
+        return None
 
-# Function to initialize a local repository
-def initialize_local_repo():
-    subprocess.run(['git', 'init'])
-    with open('README.md', 'w') as f:
-        f.write(f'# {REPO_NAME}\n\n{REPO_DESCRIPTION}\n')
-    subprocess.run(['git', 'add', 'README.md'])
-    subprocess.run(['git', 'commit', '-m', 'Initial commit'])
-
-# Function to push local repo to GitHub
-def push_to_github():
-    subprocess.run(['git', 'remote', 'add', 'origin', f'https://github.com/{GITHUB_USERNAME}/{REPO_NAME}.git'])
-    subprocess.run(['git', 'branch', '-M', 'main'])
-    subprocess.run(['git', 'push', '-u', 'origin', 'main'])
+def display_repo_info(repo_info):
+    if repo_info:
+        print(f"Repository Name: {repo_info['name']}")
+        print(f"Description: {repo_info['description']}")
+        print(f"Stars: {repo_info['stars']}")
+        print(f"Forks: {repo_info['forks']}")
+        print(f"Language: {repo_info['language']}")
+        print(f"URL: {repo_info['url']}")
+    else:
+        print("No information to display.")
 
 if __name__ == '__main__':
-    create_github_repo()
-    initialize_local_repo()
-    push_to_github()
+    parser = argparse.ArgumentParser(description='Fetch GitHub repository information.')
+    parser.add_argument('owner', help='Repository owner username')
+    parser.add_argument('repo', help='Repository name')
+    args = parser.parse_args()
+    
+    repo_info = fetch_repo_info(args.owner, args.repo)
+    display_repo_info(repo_info)
