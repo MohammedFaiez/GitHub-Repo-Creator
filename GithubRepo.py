@@ -17,7 +17,8 @@ def fetch_repo_info(owner, repo):
             'created_at': repo_data['created_at'],
             'updated_at': repo_data['updated_at'],
             'open_issues': repo_data['open_issues_count'],
-            'license': repo_data.get('license', {}).get('name', 'No license'),
+            'license': repo_data['license']['name'] if repo_data.get('license') else 'No license',
+
         }
     else:
         print(f"Error fetching repo: {response.json().get('message', 'Unknown error')}")
