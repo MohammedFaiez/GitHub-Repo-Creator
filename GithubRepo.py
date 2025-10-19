@@ -4,11 +4,18 @@ import logging
 import json
 from tabulate import tabulate
 
+# Set up basic logging format
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
+# Function to fetch repository information from GitHub API
 def fetch_repo_info(owner, repo, token=None):
     url = f'https://api.github.com/repos/{owner}/{repo}'
-    headers = {'Authorization': f'token {token}'} if token else {}
+
+    # Include special Accept header to access repository topics
+    headers = {
+        'Accept': 'application/vnd.github.mercy-preview+json',  # 👈 Required for topics
+        'Authorization': f'token {token}' if token else ''
+    }
 
     try:
         response = requests.get(url, headers=headers)
@@ -21,6 +28,8 @@ def fetch_repo_info(owner, repo, token=None):
         return None
 
     repo_data = response.json()
+
+    # Extract and return relevant repository details including topics
     return {
         'name': repo_data.get('name'),
         'description': repo_data.get('description'),
@@ -32,8 +41,10 @@ def fetch_repo_info(owner, repo, token=None):
         'updated_at': repo_data.get('updated_at'),
         'open_issues': repo_data.get('open_issues_count'),
         'license': repo_data['license']['name'] if repo_data.get('license') else 'No license',
+        'topics': ', '.join(repo_data.get('topics', [])) or 'No topics'  # 👈 New field added
     }
 
+# Function to display repository info in table or JSON format
 def display_repo_info(repo_info, output_format='table'):
     if not repo_info:
         logging.warning("No information to display.")
@@ -45,6 +56,7 @@ def display_repo_info(repo_info, output_format='table'):
         table = [[key, value] for key, value in repo_info.items()]
         print(tabulate(table, headers=["Field", "Value"], tablefmt="github"))
 
+# Main CLI entry point
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Fetch GitHub repository information.')
     parser.add_argument('owner', help='Repository owner username')
@@ -55,3 +67,4 @@ if __name__ == '__main__':
 
     repo_info = fetch_repo_info(args.owner, args.repo, args.token)
     display_repo_info(repo_info, args.format)
+``
