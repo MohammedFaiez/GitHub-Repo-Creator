@@ -27,3 +27,18 @@ A simple command-line tool to fetch and display information about GitHub reposit
    ```bash
    git clone https://github.com/your-username/github-repo-info-fetcher.git
    cd github-repo-info-fetcher
+
+
+2. Run the script with the repository name in owner/repo format:
+    ```bash
+    python fetch_repo_info.py octocat/Hello-World
+
+ 3. Example output:
+    Repository: Hello-World
+    Description: My first repository on GitHub!
+    Stars: 1500
+    Forks: 300
+    Open Issues: 42
+    Language: Python
+    License: MIT
+    Last Updated: 2025-10-28T12:34:56Z
